@@ -173,45 +173,174 @@
             </div>
         </div>
         
-        <div class="overview-section">
-            <div class="overview-card">
-                <div class="overview-label">Total Platform Units</div>
-                <div class="overview-value" style="color: #3b82f6;">50,000</div>
-                <div class="overview-detail">Available in current bundle</div>
-            </div>
-            
-            <div class="overview-card">
-                <div class="overview-label">Total Consumed</div>
-                <div class="overview-value" style="color: #10b981;">32,500</div>
-                <div class="overview-detail">65% utilization</div>
-            </div>
-            
-            <div class="overview-card">
-                <div class="overview-label">Total Allocated</div>
-                <div class="overview-value" style="color: #f59e0b;">42,000</div>
-                <div class="overview-detail">84% allocated to tenants</div>
-            </div>
-            
-            <div class="overview-card">
-                <div class="overview-label">Remaining Pool</div>
-                <div class="overview-value" style="color: #64748b;">8,000</div>
-                <div class="overview-detail">Available for allocation</div>
-            </div>
+        <div class="overview-section" id="overview-section">
+            <!-- Overview cards will be dynamically populated -->
         </div>
         
-        <div style="background: white; padding: 40px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); text-align: center;">
-            <h2 style="color: #10b981; margin-bottom: 16px;">✅ Setup Complete!</h2>
-            <p style="color: #64748b; font-size: 16px; line-height: 1.6;">
-                This is your Bundle Interval Allocation Dashboard v1.0.0<br>
-                <br>
-                <strong>Next:</strong> Check GitHub Desktop to see this change, then commit & push!<br>
-                After pushing, visit your GitHub Pages to see it live.
-            </p>
+        <div id="bundle-intervals-section">
+            <!-- Bundle interval content will be dynamically populated -->
         </div>
     </div>
     
     <script>
         let currentUnitType = 'platform';
+        
+        // Data structure for each unit type
+        const unitTypeData = {
+            'platform': {
+                name: '🔷 Platform Units',
+                totalUnits: 80000,
+                totalConsumed: 32500,
+                totalAllocated: 42000,
+                utilization: 65,
+                bundles: [
+                    {
+                        name: 'Bundle Interval 1',
+                        period: 'Jan 2025 - Dec 2025',
+                        status: 'active',
+                        capacity: 50000,
+                        allocated: 42000,
+                        consumed: 32500,
+                        remaining: 8000
+                    },
+                    {
+                        name: 'Bundle Interval 2',
+                        period: 'Jan 2026 - Jul 2026',
+                        status: 'future',
+                        capacity: 30000,
+                        allocated: 0,
+                        consumed: 0,
+                        remaining: 30000
+                    }
+                ]
+            },
+            'ai': {
+                name: '🤖 AI Units',
+                totalUnits: 100000,
+                totalConsumed: 45000,
+                totalAllocated: 60000,
+                utilization: 75,
+                bundles: [
+                    {
+                        name: 'Bundle Interval 1',
+                        period: 'Jan 2025 - Dec 2025',
+                        status: 'active',
+                        capacity: 60000,
+                        allocated: 50000,
+                        consumed: 40000,
+                        remaining: 10000
+                    },
+                    {
+                        name: 'Bundle Interval 2',
+                        period: 'Jan 2026 - Jul 2026',
+                        status: 'future',
+                        capacity: 40000,
+                        allocated: 10000,
+                        consumed: 5000,
+                        remaining: 30000
+                    }
+                ]
+            },
+            'agent': {
+                name: '👤 Agent Units',
+                totalUnits: 50000,
+                totalConsumed: 28000,
+                totalAllocated: 35000,
+                utilization: 80,
+                bundles: [
+                    {
+                        name: 'Bundle Interval 1',
+                        period: 'Jan 2025 - Dec 2025',
+                        status: 'active',
+                        capacity: 30000,
+                        allocated: 25000,
+                        consumed: 20000,
+                        remaining: 5000
+                    },
+                    {
+                        name: 'Bundle Interval 2',
+                        period: 'Jan 2026 - Jul 2026',
+                        status: 'future',
+                        capacity: 20000,
+                        allocated: 10000,
+                        consumed: 8000,
+                        remaining: 10000
+                    }
+                ]
+            },
+            'free-platform': {
+                name: '🎁 Free Platform Units',
+                totalUnits: 10000,
+                totalConsumed: 4500,
+                totalAllocated: 7000,
+                utilization: 64,
+                bundles: [
+                    {
+                        name: 'Free Bundle 1',
+                        period: 'Jan 2025 - Dec 2025',
+                        status: 'active',
+                        capacity: 10000,
+                        allocated: 7000,
+                        consumed: 4500,
+                        remaining: 3000
+                    }
+                ]
+            },
+            'free-ai': {
+                name: '🎁 Free AI Units',
+                totalUnits: 5000,
+                totalConsumed: 2800,
+                totalAllocated: 4000,
+                utilization: 70,
+                bundles: [
+                    {
+                        name: 'Free Bundle 1',
+                        period: 'Jan 2025 - Dec 2025',
+                        status: 'active',
+                        capacity: 5000,
+                        allocated: 4000,
+                        consumed: 2800,
+                        remaining: 1000
+                    }
+                ]
+            },
+            'free-agent': {
+                name: '🎁 Free Agent Units',
+                totalUnits: 3000,
+                totalConsumed: 1500,
+                totalAllocated: 2500,
+                utilization: 60,
+                bundles: [
+                    {
+                        name: 'Free Bundle 1',
+                        period: 'Jan 2025 - Dec 2025',
+                        status: 'active',
+                        capacity: 3000,
+                        allocated: 2500,
+                        consumed: 1500,
+                        remaining: 500
+                    }
+                ]
+            },
+            'free-heals': {
+                name: '💊 Free Heals',
+                totalUnits: 1000,
+                totalConsumed: 650,
+                totalAllocated: 800,
+                utilization: 81,
+                bundles: [
+                    {
+                        name: 'Free Heals Bundle',
+                        period: 'Jan 2025 - Dec 2025',
+                        status: 'active',
+                        capacity: 1000,
+                        allocated: 800,
+                        consumed: 650,
+                        remaining: 200
+                    }
+                ]
+            }
+        };
         
         function selectUnitType(unitType) {
             currentUnitType = unitType;
@@ -231,11 +360,16 @@
         }
         
         function updateDashboardForUnitType(unitType) {
-            // This will be expanded as we add more dashboard content
-            console.log(`Selected unit type: ${unitType}`);
+            const data = unitTypeData[unitType];
+            if (!data) return;
             
-            // Show notification for now
-            showNotification(`Unit Type Changed`, `Now viewing: ${formatUnitTypeName(unitType)}`);
+            // Update overview section
+            updateOverviewCards(data);
+            
+            // Update bundle intervals section
+            updateBundleIntervalsSection(data);
+            
+            console.log(`Selected unit type: ${unitType}`);
         }
         
         function formatUnitTypeName(unitType) {
@@ -282,12 +416,252 @@
             }, 3000);
         }
         
+        function updateOverviewCards(data) {
+            const overviewSection = document.getElementById('overview-section');
+            const remaining = data.totalUnits - data.totalAllocated;
+            const allocationPercent = Math.round((data.totalAllocated / data.totalUnits) * 100);
+            
+            overviewSection.innerHTML = `
+                <div class="overview-card">
+                    <div class="overview-label">Total ${data.name}</div>
+                    <div class="overview-value" style="color: #3b82f6;">${data.totalUnits.toLocaleString()}</div>
+                    <div class="overview-detail">Across all bundle intervals</div>
+                </div>
+                
+                <div class="overview-card">
+                    <div class="overview-label">Total Consumed</div>
+                    <div class="overview-value" style="color: #10b981;">${data.totalConsumed.toLocaleString()}</div>
+                    <div class="overview-detail">${data.utilization}% utilization</div>
+                </div>
+                
+                <div class="overview-card">
+                    <div class="overview-label">Total Allocated</div>
+                    <div class="overview-value" style="color: #f59e0b;">${data.totalAllocated.toLocaleString()}</div>
+                    <div class="overview-detail">${allocationPercent}% allocated to tenants</div>
+                </div>
+                
+                <div class="overview-card">
+                    <div class="overview-label">Remaining Pool</div>
+                    <div class="overview-value" style="color: #64748b;">${remaining.toLocaleString()}</div>
+                    <div class="overview-detail">Available for allocation</div>
+                </div>
+            `;
+        }
+        
+        function updateBundleIntervalsSection(data) {
+            const bundleSection = document.getElementById('bundle-intervals-section');
+            
+            let bundlesHtml = data.bundles.map((bundle, index) => {
+                const statusClass = bundle.status === 'active' ? 'status-active' : 'status-future';
+                const statusText = bundle.status === 'active' ? '✅ Active' : '🔮 Future';
+                const utilizationPercent = bundle.capacity > 0 ? Math.round((bundle.consumed / bundle.capacity) * 100) : 0;
+                const allocationPercent = bundle.capacity > 0 ? Math.round((bundle.allocated / bundle.capacity) * 100) : 0;
+                
+                return `
+                    <div class="bundle-card">
+                        <div class="bundle-header">
+                            <div>
+                                <h3 class="bundle-title">${bundle.name}</h3>
+                                <div class="bundle-period">${bundle.period}</div>
+                            </div>
+                            <span class="bundle-status ${statusClass}">${statusText}</span>
+                        </div>
+                        
+                        <div class="bundle-metrics">
+                            <div class="bundle-metric">
+                                <div class="metric-label">Capacity</div>
+                                <div class="metric-value" style="color: #3b82f6;">${bundle.capacity.toLocaleString()}</div>
+                            </div>
+                            <div class="bundle-metric">
+                                <div class="metric-label">Allocated</div>
+                                <div class="metric-value" style="color: #f59e0b;">${bundle.allocated.toLocaleString()}</div>
+                                <div class="metric-detail">${allocationPercent}%</div>
+                            </div>
+                            <div class="bundle-metric">
+                                <div class="metric-label">Consumed</div>
+                                <div class="metric-value" style="color: #10b981;">${bundle.consumed.toLocaleString()}</div>
+                                <div class="metric-detail">${utilizationPercent}%</div>
+                            </div>
+                            <div class="bundle-metric">
+                                <div class="metric-label">Remaining</div>
+                                <div class="metric-value" style="color: #64748b;">${bundle.remaining.toLocaleString()}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="progress-bar-container">
+                            <div class="progress-label">Utilization</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${utilizationPercent}%;"></div>
+                            </div>
+                            <div class="progress-text">${utilizationPercent}% used</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            bundleSection.innerHTML = `
+                <div class="bundles-container">
+                    <div class="bundles-header">
+                        <h2>📅 Bundle Intervals</h2>
+                        <div class="bundles-subtitle">Showing ${data.bundles.length} bundle interval(s) for ${data.name}</div>
+                    </div>
+                    <div class="bundles-grid">
+                        ${bundlesHtml}
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Initialize dashboard with default unit type
+        document.addEventListener('DOMContentLoaded', function() {
+            updateDashboardForUnitType(currentUnitType);
+        });
+        
         // Add animation
         const style = document.createElement('style');
         style.textContent = `
             @keyframes slideIn {
                 from { transform: translateX(100%); opacity: 0; }
                 to { transform: translateX(0); opacity: 1; }
+            }
+            
+            .bundles-container {
+                background: white;
+                padding: 24px;
+                border-radius: 12px;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+                margin-top: 24px;
+            }
+            
+            .bundles-header {
+                margin-bottom: 24px;
+            }
+            
+            .bundles-header h2 {
+                font-size: 24px;
+                color: #1e293b;
+                margin-bottom: 8px;
+            }
+            
+            .bundles-subtitle {
+                color: #64748b;
+                font-size: 14px;
+            }
+            
+            .bundles-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+                gap: 20px;
+            }
+            
+            .bundle-card {
+                background: #f8fafc;
+                border: 2px solid #e2e8f0;
+                border-radius: 12px;
+                padding: 20px;
+                transition: all 0.2s;
+            }
+            
+            .bundle-card:hover {
+                border-color: #3b82f6;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            }
+            
+            .bundle-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                margin-bottom: 20px;
+                padding-bottom: 16px;
+                border-bottom: 1px solid #e2e8f0;
+            }
+            
+            .bundle-title {
+                font-size: 18px;
+                font-weight: 600;
+                color: #1e293b;
+                margin-bottom: 4px;
+            }
+            
+            .bundle-period {
+                font-size: 13px;
+                color: #64748b;
+            }
+            
+            .bundle-status {
+                padding: 6px 12px;
+                border-radius: 12px;
+                font-size: 12px;
+                font-weight: 600;
+            }
+            
+            .status-active {
+                background: #dcfce7;
+                color: #166534;
+            }
+            
+            .status-future {
+                background: #dbeafe;
+                color: #1e40af;
+            }
+            
+            .bundle-metrics {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 16px;
+                margin-bottom: 20px;
+            }
+            
+            .bundle-metric {
+                text-align: center;
+            }
+            
+            .metric-label {
+                font-size: 12px;
+                color: #64748b;
+                margin-bottom: 4px;
+            }
+            
+            .metric-value {
+                font-size: 20px;
+                font-weight: 700;
+                margin-bottom: 2px;
+            }
+            
+            .metric-detail {
+                font-size: 11px;
+                color: #64748b;
+            }
+            
+            .progress-bar-container {
+                margin-top: 16px;
+            }
+            
+            .progress-label {
+                font-size: 12px;
+                color: #64748b;
+                margin-bottom: 6px;
+            }
+            
+            .progress-bar {
+                height: 8px;
+                background: #e5e7eb;
+                border-radius: 4px;
+                overflow: hidden;
+                margin-bottom: 4px;
+            }
+            
+            .progress-fill {
+                height: 100%;
+                background: linear-gradient(90deg, #10b981, #059669);
+                transition: width 0.3s;
+            }
+            
+            .progress-text {
+                font-size: 11px;
+                color: #64748b;
+                text-align: right;
             }
         `;
         document.head.appendChild(style);
