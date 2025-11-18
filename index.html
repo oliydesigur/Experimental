@@ -73,6 +73,69 @@
             font-size: 13px;
             color: #64748b;
         }
+        
+        /* Unit Type Selector */
+        .unit-type-selector {
+            background: white;
+            padding: 20px 24px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 24px;
+        }
+        
+        .selector-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 12px;
+        }
+        
+        .segmented-control {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .unit-type-btn {
+            padding: 10px 20px;
+            border: 2px solid #e2e8f0;
+            background: white;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #475569;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .unit-type-btn:hover {
+            border-color: #3b82f6;
+            color: #3b82f6;
+            transform: translateY(-1px);
+        }
+        
+        .unit-type-btn.active {
+            background: #3b82f6;
+            border-color: #3b82f6;
+            color: white;
+            box-shadow: 0 4px 6px rgba(59, 130, 246, 0.2);
+        }
+        
+        .unit-type-btn.free {
+            border-style: dashed;
+        }
+        
+        .unit-type-btn.free.active {
+            background: #10b981;
+            border-color: #10b981;
+        }
+        
+        .unit-type-btn.free:hover {
+            border-color: #10b981;
+            color: #10b981;
+        }
     </style>
 </head>
 <body>
@@ -80,6 +143,34 @@
         <div class="header">
             <h1>🚀 Bundle Interval Allocation Dashboard</h1>
             <div class="header-subtitle">UiPath Licensing & Governance - Version 1.0.0</div>
+        </div>
+        
+        <!-- Unit Type Selector -->
+        <div class="unit-type-selector">
+            <div class="selector-label">📦 Select Unit Type</div>
+            <div class="segmented-control">
+                <button class="unit-type-btn active" onclick="selectUnitType('platform')" data-unit-type="platform">
+                    🔷 Platform Units
+                </button>
+                <button class="unit-type-btn" onclick="selectUnitType('ai')" data-unit-type="ai">
+                    🤖 AI Units
+                </button>
+                <button class="unit-type-btn" onclick="selectUnitType('agent')" data-unit-type="agent">
+                    👤 Agent Units
+                </button>
+                <button class="unit-type-btn free" onclick="selectUnitType('free-platform')" data-unit-type="free-platform">
+                    🎁 Free Platform Units
+                </button>
+                <button class="unit-type-btn free" onclick="selectUnitType('free-ai')" data-unit-type="free-ai">
+                    🎁 Free AI Units
+                </button>
+                <button class="unit-type-btn free" onclick="selectUnitType('free-agent')" data-unit-type="free-agent">
+                    🎁 Free Agent Units
+                </button>
+                <button class="unit-type-btn free" onclick="selectUnitType('free-heals')" data-unit-type="free-heals">
+                    💊 Free Heals
+                </button>
+            </div>
         </div>
         
         <div class="overview-section">
@@ -118,5 +209,88 @@
             </p>
         </div>
     </div>
+    
+    <script>
+        let currentUnitType = 'platform';
+        
+        function selectUnitType(unitType) {
+            currentUnitType = unitType;
+            
+            // Update button states
+            document.querySelectorAll('.unit-type-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            const selectedBtn = document.querySelector(`[data-unit-type="${unitType}"]`);
+            if (selectedBtn) {
+                selectedBtn.classList.add('active');
+            }
+            
+            // Update dashboard content based on unit type
+            updateDashboardForUnitType(unitType);
+        }
+        
+        function updateDashboardForUnitType(unitType) {
+            // This will be expanded as we add more dashboard content
+            console.log(`Selected unit type: ${unitType}`);
+            
+            // Show notification for now
+            showNotification(`Unit Type Changed`, `Now viewing: ${formatUnitTypeName(unitType)}`);
+        }
+        
+        function formatUnitTypeName(unitType) {
+            const names = {
+                'platform': '🔷 Platform Units',
+                'ai': '🤖 AI Units',
+                'agent': '👤 Agent Units',
+                'free-platform': '🎁 Free Platform Units',
+                'free-ai': '🎁 Free AI Units',
+                'free-agent': '🎁 Free Agent Units',
+                'free-heals': '💊 Free Heals'
+            };
+            return names[unitType] || unitType;
+        }
+        
+        function showNotification(title, message) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+                color: white;
+                padding: 16px 20px;
+                border-radius: 12px;
+                box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+                z-index: 2000;
+                max-width: 350px;
+                animation: slideIn 0.3s ease-out;
+            `;
+            
+            notification.innerHTML = `
+                <div style="font-weight: 600; margin-bottom: 4px; font-size: 14px;">${title}</div>
+                <div style="font-size: 13px;">${message}</div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.style.animation = 'slideIn 0.3s ease-out reverse';
+                    setTimeout(() => notification.remove(), 300);
+                }
+            }, 3000);
+        }
+        
+        // Add animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
 </body>
 </html>
