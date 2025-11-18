@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UiPath - Bundle Interval Allocation Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+            color: #334155;
+            padding: 20px;
+        }
+        
+        .dashboard-container {
+            max-width: 1800px;
+            margin: 0 auto;
+        }
+        
+        /* Overview Cards */
+        .overview-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+        
+        .overview-card {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .overview-label {
+            font-size: 14px;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+        
+        .overview-value {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .overview-detail {
+            font-size: 13px;
+            color: #64748b;
+        }
+        
+        /* Notification Banner */
+        .notification-banner {
+            background: linear-gradient(135deg, #fef2f2, #fee2e2);
+            border: 2px solid #dc2626;
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+        }
+        
+        .notification-icon {
+            font-size: 32px;
+            flex-shrink: 0;
+        }
+        
+        .notification-content {
+            flex: 1;
+        }
+        
+        .notification-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #7f1d1d;
+            margin-bottom: 8px;
+        }
+        
+        .notification-text {
+            font-size: 14px;
+            color: #7f1d1d;
+            line-height: 1.6;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .btn-danger {
+            background: #dc2626;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #b91c1c;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .btn-secondary {
+            background: white;
+            color: #475569;
+            border: 1px solid #cbd5e1;
+        }
+        
+        .btn-secondary:hover {
+            background: #f8fafc;
+            border-color: #94a3b8;
+        }
+        
+        /* Allocation Table */
+        .allocation-table-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+        
+        .table-header {
+            background: #f8fafc;
+            padding: 20px 24px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .table-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        .allocation-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .allocation-table th {
+            background: #f8fafc;
+            padding: 16px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 13px;
+            color: #475569;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .allocation-table td {
+            padding: 16px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: top;
+        }
+        
+        .allocation-table tr:hover {
+            background: #f8fafc;
+        }
+        
+        .contract-cell.clickable {
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .contract-cell.clickable:hover {
+            background: #eff6ff;
+            transform: scale(1.02);
+        }
+        
+        .tenant-cell {
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .tenant-type {
+            font-size: 11px;
+            color: #64748b;
+            background: #e2e8f0;
+            padding: 2px 8px;
+            border-radius: 8px;
+            display: inline-block;
+            margin-top: 4px;
+        }
+        
+        .contract-cell {
+            text-align: center;
+        }
+        
+        .allocation-amount {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .allocation-consumed {
+            font-size: 12px;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+        
+        .progress-bar {
+            height: 6px;
+            background: #e5e7eb;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 4px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: #10b981;
+            transition: width 0.3s;
+        }
+        
+        .progress-fill.overconsume {
+            background: repeating-linear-gradient(
+                45deg,
+                #dc2626,
+                #dc2626 10px,
+                #991b1b 10px,
+                #991b1b 20px
+            );
+        }
+        
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .badge-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .badge-danger {
+            background: #fef2f2;
+            color: #7f1d1d;
+        }
+        
+        .badge-success {
+            background: #f0fdf4;
+            color: #166534;
+        }
+        
+        .badge-info {
+            background: #eff6ff;
+            color: #1e40af;
+        }
+        
+        .blocking-status {
+            font-size: 11px;
+            margin-top: 4px;
+            color: #dc2626;
+            font-weight: 600;
+        }
+        
+        .empty-cell {
+            text-align: center;
+            color: #94a3b8;
+            font-size: 14px;
+        }
+        
+        .consumed-only {
+            font-size: 14px;
+            color: #64748b;
+        }
+        
+        /* Contract Headers */
+        .contract-header {
+            font-size: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        .contract-period {
+            color: #64748b;
+        }
+        
+        .contract-capacity {
+            font-weight: 600;
+        }
+        
+        .contract-capacity.over-allocated {
+            color: #dc2626;
+        }
+        
+        .contract-capacity.normal {
+            color: #3b82f6;
+        }
+        
+        .contract-status {
+            padding: 2px 8px;
+            border-radius: 8px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+        
+        .status-active {
+            background: #dcfce7;
+            color: #166534;
+        }
+        
+        .status-expiring {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .status-info {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .status-critical {
+            background: #fef2f2;
+            color: #7f1d1d;
+        }
+        
+        /* Actions */
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+        
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .modal-overlay.active {
+            display: flex;
+        }
+        
+        .modal {
+            background: white;
+            border-radius: 16px;
+            max-width: 700px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal-header {
+            padding: 24px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .modal-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .modal-subtitle {
+            color: #64748b;
+            font-size: 14px;
+        }
+        
+        .modal-content {
+            padding: 24px;
+        }
+        
+        .modal-footer {
+            padding: 24px;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+        
+        .recommendation-box {
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+        }
+        
+        .recommendation-title {
+            font-weight: 600;
+            color: #0369a1;
+            margin-bottom: 8px;
+        }
+        
+        .allocation-breakdown {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 12px 0;
+        }
+        
+        .breakdown-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .breakdown-row:last-child {
+            border-bottom: none;
+            font-weight: 600;
+            padding-top: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Current Bundle Interval Header -->
+        <div style="background: white; padding: 16px 24px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 16px; border-left: 4px solid #3b82f6;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <div style="font-size: 14px; color: #64748b; font-weight: 500; margin-bottom: 4px;">CURRENT ACTIVE BUNDLE INTERVAL</div>
+                    <div style="font-size: 20px; font-weight: 600; color: #1e293b;">January 2025 - December 2025</div>
+                </div>
+                <div style="background: #dcfce7; color: #166534; padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600;">
+                    ✓ Active • 2 months remaining
+                </div>
+            </div>
+        </div>
+        
+        <!-- Overview Section -->
+        <div class="overview-section">
+            <div class="overview-card">
+                <div class="overview-label">Total Platform Units</div>
+                <div class="overview-value" style="color: #3b82f6;">50,000</div>
+                <div class="overview-detail">Available in current bundle</div>
+            </div>
+            
+            <div class="overview-card">
+                <div class="overview-label">Total Consumed</div>
+                <div class="overview-value" style="color: #10b981;">32,500</div>
+                <div class="overview-detail">65% utilization (as of Oct 2025)</div>
+            </div>
+            
+            <div class="overview-card">
+                <div class="overview-label">Total Allocated</div>
+                <div class="overview-value" style="color: #f59e0b;">42,000</div>
+                <div class="overview-detail">84% allocated to tenants</div>
+            </div>
+            
+            <div class="overview-card">
+                <div class="overview-label">Remaining Pool</div>
+                <div class="overview-value" style="color: #64748b;">8,000</div>
+                <div class="overview-detail">Available for allocation</div>
+            </div>
+        </div>
+        
+        <!-- Allocation Table -->
+        <div class="allocation-table-container">
+            <div class="table-header">
+                <div class="table-title">Tenant Allocation by Bundle Interval</div>
+                <button class="btn btn-secondary" onclick="exportReport()">
+                    <span>📊</span>
+                    <span>Export Allocation Report</span>
+                </button>
+            </div>
+            
+            <table class="allocation-table">
+                <thead>
+                    <tr>
+                        <th style="width: 20%;">Tenant / Business Unit</th>
+                        <th style="width: 35%; text-align: center;">
+                            <div class="contract-header">
+                                <div style="font-size: 14px; font-weight: 600;">Bundle Interval 1</div>
+                                <div class="contract-period">January 2025 - December 2025</div>
+                                <div class="contract-capacity normal">50,000 total units</div>
+                                <div class="contract-capacity normal">42,000 allocated</div>
+                                <span class="contract-status status-active">✅ ACTIVE (2 months remaining)</span>
+                            </div>
+                        </th>
+                        <th style="width: 35%; text-align: center;">
+                            <div class="contract-header">
+                                <div style="font-size: 14px; font-weight: 600;">Bundle Interval 2</div>
+                                <div class="contract-period">January 2026 - July 2026</div>
+                                <div class="contract-capacity normal">30,000 total units</div>
+                                <div class="contract-capacity normal">18,000 pre-allocated</div>
+                                <span class="contract-status status-info" style="background: #dbeafe; color: #1e40af;">📅 FUTURE (starts in 3 months)</span>
+                            </div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Tenant 1 - Finance -->
+                    <tr>
+                        <td class="tenant-cell">
+                            <div>Finance</div>
+                            <div class="tenant-type">Tenant A</div>
+                        </td>
+                        <td class="contract-cell clickable" onclick="openAllocationModal('Finance', 'Bundle Interval 1', 12000, 50000)">
+                            <div class="allocation-amount" style="color: #3b82f6;">12,000 allocated</div>
+                            <div class="allocation-consumed">8,500 consumed (71%)</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 71%;"></div>
+                            </div>
+                            <div class="status-badge badge-success">✅ Healthy</div>
+                        </td>
+                        <td class="contract-cell clickable" onclick="openAllocationModal('Finance', 'Bundle Interval 2', 5000, 30000)">
+                            <div class="allocation-amount" style="color: #6366f1;">5,000 planned</div>
+                            <div class="allocation-consumed">0 consumed</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 0%;"></div>
+                            </div>
+                            <div class="status-badge badge-info">📅 Future</div>
+                        </td>
+                    </tr>
+                    
+                    <!-- Tenant 2 - Marketing -->
+                    <tr>
+                        <td class="tenant-cell">
+                            <div>Marketing</div>
+                            <div class="tenant-type">Tenant B</div>
+                        </td>
+                        <td class="contract-cell clickable" onclick="openAllocationModal('Marketing', 'Bundle Interval 1', 10000, 50000)">
+                            <div class="allocation-amount" style="color: #3b82f6;">10,000 allocated</div>
+                            <div class="allocation-consumed">9,200 consumed (92%)</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 92%;"></div>
+                            </div>
+                            <div class="status-badge badge-warning">⚠️ High Usage</div>
+                        </td>
+                        <td class="contract-cell clickable" onclick="openAllocationModal('Marketing', 'Bundle Interval 2', 6000, 30000)">
+                            <div class="allocation-amount" style="color: #6366f1;">6,000 planned</div>
+                            <div class="allocation-consumed">0 consumed</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 0%;"></div>
+                            </div>
+                            <div class="status-badge badge-info">📅 Future</div>
+                        </td>
+                    </tr>
+                    
+                    <!-- Tenant 3 - Engineering -->
+                    <tr>
+                        <td class="tenant-cell">
+                            <div>Engineering</div>
+                            <div class="tenant-type">Main/Eng Folder</div>
+                        </td>
+                        <td class="contract-cell clickable" onclick="openAllocationModal('Engineering', 'Bundle Interval 1', 15000, 50000)">
+                            <div class="allocation-amount" style="color: #3b82f6;">15,000 allocated</div>
+                            <div class="allocation-consumed">10,800 consumed (72%)</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 72%;"></div>
+                            </div>
+                            <div class="status-badge badge-success">✅ Healthy</div>
+                        </td>
+                        <td class="contract-cell clickable" onclick="openAllocationModal('Engineering', 'Bundle Interval 2', 7000, 30000)">
+                            <div class="allocation-amount" style="color: #6366f1;">7,000 planned</div>
+                            <div class="allocation-consumed">0 consumed</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 0%;"></div>
+                            </div>
+                            <div class="status-badge badge-info">📅 Future</div>
+                        </td>
+                    </tr>
+                    
+                    <!-- Tenant 4 - Operations -->
+                    <tr>
+                        <td class="tenant-cell">
+                            <div>Operations</div>
+                            <div class="tenant-type">Main/Ops Folder</div>
+                        </td>
+                        <td class="contract-cell clickable" onclick="openAllocationModal('Operations', 'Bundle Interval 1', 3000, 50000)">
+                            <div class="allocation-amount" style="color: #3b82f6;">3,000 allocated</div>
+                            <div class="allocation-consumed">1,500 consumed (50%)</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 50%;"></div>
+                            </div>
+                            <div class="status-badge badge-success">✅ Healthy</div>
+                        </td>
+                        <td class="contract-cell">
+                            <div class="empty-cell">No allocation</div>
+                            <div style="font-size: 11px; color: #64748b; margin-top: 4px;">Click to allocate</div>
+                        </td>
+                    </tr>
+                    
+                    <!-- Tenant 5 - Sales -->
+                    <tr>
+                        <td class="tenant-cell">
+                            <div>Sales</div>
+                            <div class="tenant-type">Tenant C</div>
+                        </td>
+                        <td class="contract-cell clickable" onclick="openAllocationModal('Sales', 'Bundle Interval 1', 2000, 50000)">
+                            <div class="allocation-amount" style="color: #3b82f6;">2,000 allocated</div>
+                            <div class="allocation-consumed">1,500 consumed (75%)</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 75%;"></div>
+                            </div>
+                            <div class="status-badge badge-success">✅ Healthy</div>
+                        </td>
+                        <td class="contract-cell">
+                            <div class="empty-cell">No allocation</div>
+                            <div style="font-size: 11px; color: #64748b; margin-top: 4px;">Click to allocate</div>
+                        </td>
+                    </tr>
+                    
+                    <!-- Totals Row -->
+                    <tr style="background: #f8fafc; font-weight: 600; border-top: 2px solid #cbd5e1;">
+                        <td style="font-size: 16px;">TOTALS</td>
+                        <td class="contract-cell">
+                            <div style="font-size: 18px; color: #1e293b;">42,000 allocated</div>
+                            <div style="font-size: 14px; color: #64748b;">32,500 consumed</div>
+                            <div style="font-size: 12px; color: #059669; margin-top: 4px;">✅ 8,000 remaining in pool</div>
+                        </td>
+                        <td class="contract-cell">
+                            <div style="font-size: 18px; color: #6366f1;">18,000 planned</div>
+                            <div style="font-size: 14px; color: #64748b;">0 consumed</div>
+                            <div style="font-size: 12px; color: #64748b; margin-top: 4px;">12,000 available for planning</div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+    </div>
+    
+    <!-- Modal for Allocation -->
+    <div id="allocation-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title" id="allocation-modal-title">Allocate Units - Finance → Bundle Interval 2</div>
+                <div class="modal-subtitle" id="allocation-modal-subtitle">Adjust allocation for this tenant-bundle pair</div>
+            </div>
+            
+            <div class="modal-content">
+                <div style="background: #f8fafc; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div>
+                            <div style="font-size: 12px; color: #64748b; margin-bottom: 4px;">Bundle Interval Capacity</div>
+                            <div style="font-size: 20px; font-weight: 700;" id="contract-capacity">40,000 units</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 12px; color: #64748b; margin-bottom: 4px;">Currently Allocated</div>
+                            <div style="font-size: 20px; font-weight: 700; color: #3b82f6;" id="current-allocation">0 units</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 12px; color: #64748b; margin-bottom: 4px;">Total Bundle Allocated</div>
+                            <div style="font-size: 16px; font-weight: 600;" id="total-contract-allocated">25,000 units</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 12px; color: #64748b; margin-bottom: 4px;">Available for Allocation</div>
+                            <div style="font-size: 16px; font-weight: 600; color: #059669;" id="available-allocation">15,000 units</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 8px;">
+                        Allocation Amount (units)
+                    </label>
+                    <input 
+                        type="number" 
+                        id="allocation-input" 
+                        style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 16px; box-sizing: border-box;"
+                        placeholder="Enter allocation amount"
+                        min="0"
+                        oninput="validateAllocation()"
+                    >
+                    <div id="allocation-error" style="color: #dc2626; font-size: 12px; margin-top: 4px; display: none;"></div>
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" id="blocking-checkbox" style="width: 18px; height: 18px;">
+                        <span style="font-weight: 600;">🔒 Block overconsumption from org pool</span>
+                    </label>
+                    <div style="font-size: 12px; color: #64748b; margin-top: 4px; margin-left: 26px;">
+                        When checked, tenant cannot consume beyond allocated amount
+                    </div>
+                </div>
+                
+                <div id="allocation-preview" style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; padding: 16px; display: none;">
+                    <div style="font-weight: 600; color: #0369a1; margin-bottom: 8px;">Allocation Preview:</div>
+                    <div style="color: #0f172a; font-size: 14px;" id="preview-text"></div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeAllocationModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="confirmAllocation()" id="confirm-allocation-btn" disabled>
+                    <span>✅</span>
+                    <span>Apply Allocation</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal for Rebalance Details -->
+    <div id="rebalance-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">Allocation Planning Assistant</div>
+                <div class="modal-subtitle">Optimize allocations across bundle intervals</div>
+            </div>
+            
+            <div class="modal-content">
+                <h3 style="margin-bottom: 12px; color: #3b82f6;">📊 Current Status:</h3>
+                <div style="background: #f0f9ff; border: 2px solid #3b82f6; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+                    <div class="allocation-breakdown">
+                        <div class="breakdown-row">
+                            <span>Bundle Interval 1 (Active):</span>
+                            <strong>42,000 / 50,000 allocated (84%)</strong>
+                        </div>
+                        <div class="breakdown-row">
+                            <span>Bundle Interval 2 (Future):</span>
+                            <strong>18,000 / 30,000 planned (60%)</strong>
+                        </div>
+                        <div class="breakdown-row" style="color: #059669;">
+                            <span>Remaining Pool:</span>
+                            <strong>8,000 units available</strong>
+                        </div>
+                    </div>
+                    <div style="margin-top: 12px; color: #1e293b; font-weight: 600;">
+                        ✅ All allocations are healthy and within limits
+                    </div>
+                </div>
+                
+                <div class="recommendation-box">
+                    <div class="recommendation-title">💡 Planning Recommendations</div>
+                    <div style="font-size: 14px; color: #0f172a; margin-bottom: 12px;">
+                        Consider these optimizations for better resource utilization:
+                    </div>
+                    
+                    <h4 style="margin: 16px 0 8px 0;">Marketing (High Usage):</h4>
+                    <div style="margin-left: 16px; font-size: 14px;">
+                        Current: 10K allocated, 9.2K consumed (92% usage)<br>
+                        <strong>Recommendation: Consider increasing allocation by 2K for Bundle Interval 2</strong><br>
+                        <span style="color: #f59e0b;">⚠️ High utilization may lead to bottlenecks</span>
+                    </div>
+                    
+                    <h4 style="margin: 16px 0 8px 0;">Operations (Low Planning):</h4>
+                    <div style="margin-left: 16px; font-size: 14px;">
+                        Current: 3K in Bundle 1, none planned for Bundle 2<br>
+                        <strong>Recommendation: Plan 2K for Bundle Interval 2 based on current usage patterns</strong>
+                    </div>
+                    
+                    <h4 style="margin: 16px 0 8px 0;">Sales (Low Planning):</h4>
+                    <div style="margin-left: 16px; font-size: 14px;">
+                        Current: 2K in Bundle 1, none planned for Bundle 2<br>
+                        <strong>Recommendation: Plan 2K for Bundle Interval 2</strong>
+                    </div>
+                </div>
+                
+                <h3 style="margin: 20px 0 12px 0;">📅 Bundle Interval 2 Planning</h3>
+                <div style="padding: 12px; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 6px;">
+                    <strong>Available Capacity:</strong> 12,000 units remaining for allocation in Bundle Interval 2
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+                <button class="btn btn-primary" onclick="applyRecommendations()">
+                    <span>✨</span>
+                    <span>Apply Recommendations</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let currentTenant = '';
+        let currentContract = '';
+        let currentAllocation = 0;
+        let contractCapacity = 0;
+        
+        function openAllocationModal(tenant, contract, currentAlloc, capacity) {
+            currentTenant = tenant;
+            currentContract = contract;
+            currentAllocation = currentAlloc;
+            contractCapacity = capacity;
+            
+            // Update modal content
+            document.getElementById('allocation-modal-title').textContent = `Allocate Units - ${tenant} → ${contract}`;
+            document.getElementById('allocation-modal-subtitle').textContent = `Adjust allocation for ${tenant} in ${contract}`;
+            document.getElementById('contract-capacity').textContent = `${capacity.toLocaleString()} units`;
+            document.getElementById('current-allocation').textContent = `${currentAlloc.toLocaleString()} units`;
+            
+            // Calculate total allocated and available
+            let totalAllocated = contract === 'Bundle Interval 1' ? 42000 : 18000;
+            let available = capacity - totalAllocated + currentAlloc;
+            
+            document.getElementById('total-contract-allocated').textContent = `${totalAllocated.toLocaleString()} units`;
+            document.getElementById('available-allocation').textContent = `${available.toLocaleString()} units`;
+            
+            // Set current value in input
+            document.getElementById('allocation-input').value = currentAlloc || '';
+            document.getElementById('blocking-checkbox').checked = true; // All current tenants are blocked
+            
+            // Show modal
+            document.getElementById('allocation-modal').classList.add('active');
+            
+            // Validate initial state
+            validateAllocation();
+        }
+        
+        function closeAllocationModal() {
+            document.getElementById('allocation-modal').classList.remove('active');
+            document.getElementById('allocation-input').value = '';
+            document.getElementById('allocation-error').style.display = 'none';
+            document.getElementById('allocation-preview').style.display = 'none';
+        }
+        
+        function validateAllocation() {
+            const input = document.getElementById('allocation-input');
+            const value = parseInt(input.value) || 0;
+            const errorDiv = document.getElementById('allocation-error');
+            const confirmBtn = document.getElementById('confirm-allocation-btn');
+            const previewDiv = document.getElementById('allocation-preview');
+            const previewText = document.getElementById('preview-text');
+            
+            // Calculate available capacity
+            let totalAllocated = currentContract === 'Bundle Interval 1' ? 42000 : 18000;
+            let available = contractCapacity - totalAllocated + currentAllocation;
+            
+            if (value < 0) {
+                errorDiv.textContent = 'Allocation cannot be negative';
+                errorDiv.style.display = 'block';
+                confirmBtn.disabled = true;
+                previewDiv.style.display = 'none';
+                return;
+            }
+            
+            if (value > available) {
+                errorDiv.textContent = `Exceeds available capacity (${available.toLocaleString()} units available)`;
+                errorDiv.style.display = 'block';
+                confirmBtn.disabled = true;
+                previewDiv.style.display = 'none';
+                return;
+            }
+            
+            // Valid input
+            errorDiv.style.display = 'none';
+            confirmBtn.disabled = false;
+            
+            // Show preview
+            const diff = value - currentAllocation;
+            const isBlocked = document.getElementById('blocking-checkbox').checked;
+            
+            if (diff !== 0) {
+                previewDiv.style.display = 'block';
+                let changeText = diff > 0 ? `+${diff.toLocaleString()}` : `${diff.toLocaleString()}`;
+                previewText.innerHTML = `
+                    <strong>${currentTenant}</strong> allocation in <strong>${currentContract}</strong>:<br>
+                    Current: ${currentAllocation.toLocaleString()} units<br>
+                    New: ${value.toLocaleString()} units (${changeText} change)<br>
+                    Blocking: ${isBlocked ? '🔒 Enabled (cannot overconsume)' : '🔓 Disabled (can use org pool)'}
+                `;
+            } else {
+                previewDiv.style.display = 'none';
+            }
+        }
+        
+        function confirmAllocation() {
+            const value = parseInt(document.getElementById('allocation-input').value) || 0;
+            const isBlocked = document.getElementById('blocking-checkbox').checked;
+            
+            showNotification(
+                '✅ Allocation Updated', 
+                `${currentTenant} allocation in ${currentContract} updated to ${value.toLocaleString()} units.\n\nBlocking policy: ${isBlocked ? '🔒 Enabled' : '🔓 Disabled'}\n\nChanges will be applied after saving.`
+            );
+            
+            closeAllocationModal();
+        }
+        
+        function rebalanceTenants() {
+            document.getElementById('rebalance-modal').classList.add('active');
+        }
+        
+        function closeModal() {
+            document.getElementById('rebalance-modal').classList.remove('active');
+        }
+        
+        function confirmRebalance() {
+            showNotification('✨ Planning Recommendations Applied', 'Allocation recommendations have been noted. Please review and adjust individual tenant allocations as needed.');
+            closeModal();
+        }
+        
+        function applyRecommendations() {
+            showNotification('✨ Recommendations Applied', 'Planning recommendations for Bundle Interval 2 have been saved. You can now adjust individual tenant allocations.');
+            closeModal();
+        }
+        
+        function exportReport() {
+            showNotification('📊 Exporting Allocation Report', 'Generating comprehensive report with:\n\n• Current bundle interval allocations\n• Consumption patterns by tenant\n• Bundle Interval 2 planning summary\n• Utilization trends\n• Capacity recommendations\n\nReport will be downloaded as Excel file.');
+        }
+        
+        function showNotification(title, message) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+                color: white;
+                padding: 20px 24px;
+                border-radius: 12px;
+                box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+                z-index: 2000;
+                max-width: 450px;
+                animation: slideIn 0.3s ease-out;
+            `;
+            
+            notification.innerHTML = `
+                <div style="font-weight: 600; margin-bottom: 8px; font-size: 16px;">${title}</div>
+                <div style="font-size: 14px; line-height: 1.5; white-space: pre-line;">${message}</div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            notification.addEventListener('click', () => notification.remove());
+            
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.style.animation = 'slideIn 0.3s ease-out reverse';
+                    setTimeout(() => notification.remove(), 300);
+                }
+            }, 8000);
+        }
+        
+        // Close modal when clicking outside
+        document.getElementById('rebalance-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+        
+        document.getElementById('allocation-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeAllocationModal();
+            }
+        });
+        
+        // Update preview when blocking checkbox changes
+        document.getElementById('blocking-checkbox').addEventListener('change', validateAllocation);
+        
+        // Add CSS animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
